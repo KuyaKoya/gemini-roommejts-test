@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 50px">
 		<input
 			type="file"
 			accept="application/pdf"
@@ -12,7 +12,11 @@
 			Analyze PDF
 		</button>
 		<div v-if="loading">Loading...</div>
-		<pre v-if="result">{{ result }}</pre>
+		<pre
+			v-if="result"
+			style="width: 80%; background: #f4f4f4; padding: 16px; border-radius: 8px; overflow-x: auto; flex-wrap: wrap"
+			>{{ result }}</pre
+		>
 	</div>
 </template>
 
@@ -59,13 +63,14 @@
 			]
 
 			const response = await ai.models.generateContent({
-				model: 'gemini-2.0-flash-exp',
+				model: 'gemini-2.5-flash',
 				contents: contents,
 			})
 			result.value = response.text
 			console.log(response.text)
 		} catch (error) {
 			console.error('Error:', error)
+			result.value = error.message || 'An error occurred'
 		} finally {
 			loading.value = false
 		}
