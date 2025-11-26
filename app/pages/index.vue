@@ -17,6 +17,11 @@
 			style="width: 80%; background: #f4f4f4; padding: 16px; border-radius: 8px; overflow-x: auto; flex-wrap: wrap"
 			>{{ result }}</pre
 		>
+		<div v-if="savedResults">
+			<pre style="width: 80%; background: #f4f4f4; padding: 16px; border-radius: 8px; overflow-x: auto; flex-wrap: wrap">{{
+				savedResults
+			}}</pre>
+		</div>
 	</div>
 </template>
 
@@ -32,6 +37,7 @@
 	const pdfData = ref(null)
 	const loading = ref(false)
 	const result = ref(null)
+	const savedResults = ref(null)
 
 	const handleFileSelect = async (event) => {
 		const file = event.target.files[0]
@@ -58,7 +64,7 @@
 					},
 				},
 				{
-					text: "Look at the floorplan image and identify all rooms or enclosed sections that have at least one wall or boundary line drawn in color (i.e. not black or gray — for example, lines in green, blue, or red). For each of these rooms or sections: Extract any text, numbers, or codes that appear inside the space or directly next to it, especially if they look like a room name, label, or identifier. If multiple text elements are close together, combine them in top-to-bottom reading order to form a single complete label (e.g., 'FOKUS 2 P 1542'). If no identifying text is found inside or near the space, return a placeholder like 'unknown 1', 'unknown 2', and so on. Return only a flat array with an object of room name, door type (ex PIDG. usually encircle), wall height (indicated with an H:, color green), and wall length (blue text), in any order. Do not include duplicates or unlabeled rooms more than once. If there are no colored walls or identifiable rooms, return an empty array. If there are no wall height or length indicators, set those values to null.",
+					text: "Look at the floorplan image and identify all rooms or enclosed sections that have at least one wall or boundary line drawn in color (i.e. not black or gray — for example, lines in green, blue, or red). For each of these rooms or sections: Extract any text, numbers, or codes that appear inside the space or directly next to it, especially if they look like a room name, label, or identifier. If multiple text elements are close together, combine them in top-to-bottom reading order to form a single complete label (e.g., 'FOKUS 2 P 1542'). If no identifying text is found inside or near the space, return a placeholder like 'unknown 1', 'unknown 2', and so on. Return only a flat array with an object of room name, door type (ex PIDG. usually encircle), wall height (indicated with an H:, color green), and wall length (blue text), in any order. Do not include duplicates or unlabeled rooms more than once. If there are no colored walls or identifiable rooms, return an empty array. If there are no wall height or length indicators, set those values to null. Rules: 1) Only include rooms or sections with colored walls. 2) Extract and combine text labels in reading order. 3) Use placeholders for unlabeled spaces. 4) Return a flat array of objects with room details. 5) Avoid duplicates and unlabeled entries. 6) Set missing height/length to null. 7) Return an empty array if no colored walls are found.",
 				},
 			]
 
@@ -67,7 +73,7 @@
 				contents: contents,
 			})
 			result.value = response.text
-			console.log(response.text)
+			localStorage.setItem('result', JSON.stringify(result.value))
 		} catch (error) {
 			console.error('Error:', error)
 			result.value = error.message || 'An error occurred'
@@ -75,4 +81,10 @@
 			loading.value = false
 		}
 	}
+
+	onMounted(() => {
+		const storedResult = localStorage.getItem('result')
+		savedResults.value = JSON.parse(storedResult) || null
+		console.log('Saved Results on Mount:', savedResults.value)
+	})
 </script>
